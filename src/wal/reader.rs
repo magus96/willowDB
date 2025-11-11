@@ -1,5 +1,5 @@
 use crate::wal::{
-    metadata::{self, WalMetadata},
+    metadata::WalMetadata,
     serializer::Serializer,
     types::{BatchId, LSN, LogEntry, RecordType},
 };
@@ -7,7 +7,6 @@ use std::{
     collections::HashMap,
     fs::{self, File},
     io::Read,
-    os::unix::{net::UnixDatagram, raw::off_t},
     path::PathBuf,
 };
 
@@ -46,8 +45,7 @@ impl WalReader {
             .map_err(|e| format!("WAL Error unable to get log files for directory :{}", e))?;
 
         for file in log_files {
-            let file_contents =
-                self.read_log_file(&file, &mut entries, &mut batch_status, &mut last_lsn)?;
+            self.read_log_file(&file, &mut entries, &mut batch_status, &mut last_lsn)?;
         }
 
         let committed_batches: Vec<BatchId> = batch_status
@@ -584,7 +582,6 @@ mod tests {
         assert_eq!(to_replay.len(), 1);
         assert_eq!(to_replay[0].key, b"committed_key");
     }
-
 
     #[test]
     fn test_try_read_entry_deterministic_size() {
